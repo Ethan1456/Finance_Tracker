@@ -11,7 +11,13 @@ text = pytesseract.image_to_string(img, config=config)
 # regex for extracting the actual text
 items = re.finditer(r'(\d+)\s([A-Za-z\s]+?)\s(\d+\.\d{2})',text)
 
-
-print(items)
+# item dictionary
+itemDict = {}
 for item in items:
-    print(f"Quantity: {item.group(1)}, Item: {item.group(2).strip()}, Price: {item.group(3)}")
+    quantity = item.group(1)
+    name = item.group(2).strip()
+    price = item.group(3)
+    itemDict[name] = {'quantity': quantity, 'price': price}
+
+for name,details in itemDict.items():
+    print(f"{name}, Quantity: {details['quantity']}, Price: {details['price']}")
