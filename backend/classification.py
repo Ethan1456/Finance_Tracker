@@ -6,3 +6,6 @@ load_dotenv()
 apiKey = os.getenv("SPOONACULAR_API_KEY")
 
 def classify_items(itemDict):
+    pass
+
+

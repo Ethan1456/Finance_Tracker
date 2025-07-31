@@ -7,11 +7,12 @@ image_path = r"C:\Users\ethan\Documents\Side Projects\Finance_Tracker\receipts\r
 # Run OCR on them
 itemDict = extract_items(image_path)
 
+print(itemDict)
 # classify items
 classifiedItems = classify_items(itemDict)
 
 
 # Pass the results to the database function
-insertItems(classifiedItems)
+# insertItems(classifiedItems)
 
 print("Ran")

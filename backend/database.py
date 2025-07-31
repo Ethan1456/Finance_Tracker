@@ -37,7 +37,21 @@ def create_tables(connection, db_name):
     """
     Creates necessary tables in the specified database.
     """
-    pass
+    cursor = connection.cursor()
+    try:
+        connection.database = db_name
+        cursor = connection.cursor()
+        # Create items table
+        
+
+
+
+
+
+        cursor.close()
+    except Error as e:
+        print(f"Error: '{e}'")
+
 
 
 def main():
@@ -60,7 +74,8 @@ def main():
             # Step 2: Create the tables in the database
             create_tables(connection, db_name)
            
-            # Step 3: Populate tables with data from the CSV files
+            # Step 3: Populate tables with data from the database.py file
+
             
 
            
