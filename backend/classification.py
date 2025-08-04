@@ -34,6 +34,10 @@ def classify_items(itemDict):
                 if category:
                     # formatting
                     category = category.replace("en:", "").replace("-", " ").title()
+                    # just get first word of category
+                    category = category.split()[0]
+
+
                 # add to classified items
                 classifiedItems[name] = {
                     'quantity': details['quantity'],
