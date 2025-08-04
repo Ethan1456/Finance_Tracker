@@ -1,5 +1,5 @@
 from OCR import extract_items
-from database import insertItems
+# from database import insertItems
 from classification import classify_items
 
 image_path = r"C:\Users\ethan\Documents\Side Projects\Finance_Tracker\receipts\receipt1.png"
@@ -7,11 +7,11 @@ image_path = r"C:\Users\ethan\Documents\Side Projects\Finance_Tracker\receipts\r
 # Run OCR on them
 itemDict = extract_items(image_path)
 
-print(itemDict)
+# print(itemDict)
 # classify items
 classifiedItems = classify_items(itemDict)
 
-
+print(classifiedItems)
 # Pass the results to the database function
 # insertItems(classifiedItems)
 

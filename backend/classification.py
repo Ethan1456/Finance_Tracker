@@ -1,10 +1,5 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
 import requests
 
-# spoonacular api used
-apiKey = os.getenv("SPOONACULAR_API_KEY")
 
 def classify_items(itemDict):
     """
@@ -13,18 +8,32 @@ def classify_items(itemDict):
     classifiedItems = {}
     electronics_keywords = ['laptop', 'phone', 'headphones', 'charger', 'monitor', 'tv', 'usb', 'mouse', 'keyboard']
     # get categories from api
-    url = f"https://api.spoonacular.com/food/ingredients/classify?apiKey={apiKey}"
-    # loop throug the items in the dictionary
+    url = "https://world.openfoodfacts.org/cgi/search.pl"
+    # loop through the items in the dictionary
     for name,details in itemDict.items():
+        params = {
+            "search_terms": name,
+            "search_simple": 1,
+            "action": "process",
+            "json": 1
+        }
         # go to api to get the name
-        response = requests.get(url, params={"ingredientName": name})
+        response = requests.get(url, params=params)
         # if response successful
         if response.status_code == 200:
             # get the data in json format
             data = response.json()
-            # get the cartegory if it exists
-            if data.get("category"):
-                category = data["category"]
+            category = None
+            # get the category if it exists
+            if data.get("products"):
+                # get first product name found from product json
+                product = data["products"][0]
+                # extract category from the product JSON format
+                category = product.get("categories_tags", [None])[0]
+                # if category exists, add to classified items
+                if category:
+                    # formatting
+                    category = category.replace("en:", "").replace("-", " ").title()
                 # add to classified items
                 classifiedItems[name] = {
                     'quantity': details['quantity'],
@@ -50,3 +59,7 @@ def classify_items(itemDict):
             print(f"Error fetching data from API:", response.status_code)
 
     return classifiedItems
+
+
+
+

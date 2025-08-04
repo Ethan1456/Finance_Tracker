@@ -15,7 +15,7 @@ def extract_items(path):
     # find the date
     date_match = re.search(r'\b\d{2}[/-]\d{2}[/-]\d{2,4}\b',text)
 
-
+    # if date
     if date_match:
         date_purchased = date_match.group(0)
     
