@@ -1,6 +1,7 @@
 # mysql database
 import mysql.connector
 from mysql.connector import Error
+from main import date_purchased, classifiedItems
 
 def create_mysql_connection(host_name, user_name, user_password):
     """
@@ -40,19 +41,27 @@ def create_tables(connection, db_name):
     cursor = connection.cursor()
     try:
         connection.database = db_name
-        cursor = connection.cursor()
         # Create items table
-        
-
-
-
-
-
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                date_purchased DATE,
+                name VARCHAR(255) NOT NULL,
+                quantity INT NOT NULL,
+                price DECIMAL(10, 2) NOT NULL,
+                isEssential BOOLEAN DEFAULT FALSE,
+                category VARCHAR(100)
+            )
+        """)
+        print("Table 'items' created or already exists.")
         cursor.close()
     except Error as e:
         print(f"Error: '{e}'")
 
+def insertItems(connection, db_name, items, date_purchased):
 
+    pass
+    
 
 def main():
     # MySQL connection details
@@ -74,12 +83,11 @@ def main():
             # Step 2: Create the tables in the database
             create_tables(connection, db_name)
            
-            # Step 3: Populate tables with data from the database.py file
+            # Step 3: insert data into the items table
+            insertItems(connection, db_name, classifiedItems, date_purchased)
 
             
 
-           
-            # Step 4: Execute queries and print results
 
 
             

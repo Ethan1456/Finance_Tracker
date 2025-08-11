@@ -4,10 +4,7 @@ import re
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # converts image to text
-
-
-def extract_items(path):
-
+def date_purchased(path):
     img = Image.open(path)
     config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=config)
@@ -20,6 +17,14 @@ def extract_items(path):
         date_purchased = date_match.group(0)
     
     print(f"Date Purchased: {date_purchased}")
+    return date_purchased
+
+def extract_items(path):
+
+    img = Image.open(path)
+    config = r'--oem 3 --psm 6'
+    text = pytesseract.image_to_string(img, config=config)
+
 
     # regex for extracting the actual text
     items = re.finditer(r'(\d+)\s([A-Za-z\s]+?)\s(\d+\.\d{2})',text)
@@ -37,6 +42,6 @@ def extract_items(path):
 
     # print items
     for name,details in itemDict.items():
-        print(f"Date :{date_purchased},Name: {name}, Quantity: {details['quantity']}, Price: {details['price']}")
+        print(f"Name: {name}, Quantity: {details['quantity']}, Price: {details['price']}")
 
     return itemDict
