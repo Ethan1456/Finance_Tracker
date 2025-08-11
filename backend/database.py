@@ -1,7 +1,7 @@
 # mysql database
 import mysql.connector
 from mysql.connector import Error
-from main import date_purchased, classifiedItems
+
 
 def create_mysql_connection(host_name, user_name, user_password):
     """
@@ -41,6 +41,8 @@ def create_tables(connection, db_name):
     cursor = connection.cursor()
     try:
         connection.database = db_name
+        # drop to avoid potential duplicate table errors
+        cursor.execute("DROP TABLE IF EXISTS items")
         # Create items table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS items (
@@ -59,47 +61,31 @@ def create_tables(connection, db_name):
         print(f"Error: '{e}'")
 
 def insertItems(connection, db_name, items, date_purchased):
+    connection.database = db_name
+    cursor = connection.cursor()
+    try:
+        for name, details in items.items():
+            # skip the grand total item in dictionary
+            if name.strip().upper() in  ["GRAND TOTAL", "TOTAL"]:
+                continue
+            # execute query
+            cursor.execute("""
+                INSERT INTO items (date_purchased, name, quantity, price, isEssential, category)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                date_purchased,
+                name,
+                details['quantity'],
+                details['price'],
+                False,  # Assuming isEssential is False by default
+                details.get('category', None)  # Category can be None if not provided
+            ))
+        connection.commit()
+        print("Items inserted successfully.")
+    except Error as e:
+        print(f"Error: '{e}'")
+    finally:
+        cursor.close()
 
-    pass
     
 
-def main():
-    # MySQL connection details
-    host_name = "localhost"
-    user_name = "root"
-    user_password = "Qweasdzxc$"
-
-    # Database name
-    db_name = "FinanceTracker"
-
-# Create MySQL connection
-    connection = create_mysql_connection(host_name, user_name, user_password)
-   
-    if connection:
-        try:
-            # Step 1: Create the database
-            create_database(connection, db_name)
-           
-            # Step 2: Create the tables in the database
-            create_tables(connection, db_name)
-           
-            # Step 3: insert data into the items table
-            insertItems(connection, db_name, classifiedItems, date_purchased)
-
-            
-
-
-
-            
-        finally:
-            # Step 5: Close the MySQL connection
-            connection.close()
-            print("MySQL connection closed.")
-    else:
-        print("Failed to connect to MySQL")
-
-    print("Database setup complete.")
-
-
-if __name__ == "__main__":
-    main()
