@@ -20,7 +20,6 @@ def create_mysql_connection(host_name, user_name, user_password):
         print(f"Error: '{e}'")
         return None
 
-
 def create_database(connection, db_name):
     """
     Creates a database if it doesn't already exist.
@@ -32,7 +31,6 @@ def create_database(connection, db_name):
         cursor.close()
     except Error as e:
         print(f"Error: '{e}'")
-
 
 def create_tables(connection, db_name):
     """
@@ -52,7 +50,8 @@ def create_tables(connection, db_name):
                 quantity INT NOT NULL,
                 price DECIMAL(10, 2) NOT NULL,
                 isEssential BOOLEAN DEFAULT FALSE,
-                category VARCHAR(100)
+                category VARCHAR(100),
+                UNIQUE KEY unique_item (date_purchased, name)
             )
         """)
         print("Table 'items' created or already exists.")
@@ -72,6 +71,11 @@ def insertItems(connection, db_name, items, date_purchased):
             cursor.execute("""
                 INSERT INTO items (date_purchased, name, quantity, price, isEssential, category)
                 VALUES (%s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        quantity = VALUES(quantity),
+                        price = VALUES(price),
+                        isEssential = VALUES(isEssential),
+                        category = VALUES(category)
             """, (
                 date_purchased,
                 name,
