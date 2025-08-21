@@ -1,3 +1,5 @@
+
+
 function Navigator() {
   return (
     <nav className="Navigator">

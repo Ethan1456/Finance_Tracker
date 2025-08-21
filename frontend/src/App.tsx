@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar"
 import Dashboard from "./Dashboard"
 import "./App.css"
 import Overview from "./Overview"
+import Footer from "./footer"
 
 function App() {
   return (
@@ -11,8 +12,11 @@ function App() {
         <Navigator />
         <Overview />
       </div>
-      <Sidebar />
-      <Dashboard />
+      <div className="contentWrapper">
+        <Sidebar />
+        <Dashboard />
+      </div>
+      <Footer />
     </>
   );
 }

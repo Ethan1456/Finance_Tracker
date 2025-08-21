@@ -1,5 +1,7 @@
-body {
+html,body {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: 'Inter', sans-serif;
   background-color: #ffffff; /* light mode background */
   color: #121212; /* text color */
