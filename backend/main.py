@@ -1,72 +1,78 @@
+from fastapi import FastAPI, HTTPException
+import pymysql
+app = FastAPI()
 from OCR import extract_items, date_purchased
-from database import create_mysql_connection, create_database, create_tables, insertItems
 from classification import classify_items
+from database import insertItems, create_mysql_connection
 from datetime import datetime
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 
-def print_table_contents(connection, db_name, table_name):
+# MySQL connection info
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "Qweasdzxc$"
+DB_NAME = "FinanceTracker"
+TABLE_NAME = "items"
+
+# add this to show up in table as stops browser blocking
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+# connecting to database
+def get_connection():
     try:
-        connection.database = db_name
-        cursor = connection.cursor()
-        cursor.execute(f"SELECT * FROM {table_name}")
-        rows = cursor.fetchall()
+        conn = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,  # directly connect to DB
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        return conn
+    except pymysql.MySQLError as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
 
-        # Print column names
-        column_names = [desc[0] for desc in cursor.description]
-        print(" | ".join(column_names))
-        print("-" * 50)
+# purchase endpoint
+@app.get("/purchases")
+def get_purchases():
+    connection = get_connection()
+    if connection is None:
+        raise HTTPException(status_code=500, detail="DB connection failed")
 
-        # Print each row
-        for row in rows:
-            print(" | ".join(str(item) for item in row))
-
-    except Exception as e:
-        print(f"Error fetching data: {e}")
-    finally:
-        cursor.close()
-
-
-def main():
-    image_path = r"C:\Users\ethan\Documents\Side Projects\Finance_Tracker\receipts\receipt1.png"
-
-    # Run OCR on them
-    itemDict = extract_items(image_path)
-
-    rawDate = date_purchased(image_path)
-    formatdate = "%d/%m/%y"  
-    # Convert the date to a standard format
-    try:
-        formattedDate = datetime.strptime(rawDate, formatdate).date()
-    except ValueError:
-        print(f"Error parsing date: {rawDate}. Please ensure the date is in the format {formatdate}.")
-        return
-
-    # classify items
-    classifiedItems = classify_items(itemDict)
-    
-    # MySQL connection details
-    host_name = "localhost"
-    user_name = "root"
-    user_password = "Qweasdzxc$"
-
-    # Database name
-    db_name = "FinanceTracker"
-
-    connection = create_mysql_connection(host_name, user_name, user_password)
-    create_database(connection, db_name)
-    create_tables(connection, db_name)
-    # Insert items into the database
-    insertItems(connection, db_name, classifiedItems, formattedDate)
-    print_table_contents(connection, db_name, "items")
-
-    # Close the connection
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT * FROM {TABLE_NAME}")
+    rows = cursor.fetchall()  # each row is already a dict
+    cursor.close()
     connection.close()
 
-
-    print("Ran")
-    # print mysql tables
+    return rows  # no mapping needed
 
 
+@app.post("/upload")
+async def upload_receipt(file: UploadFile = File(...)):
+    contents = await file.read()
+    # save file temporarily
+    path = f"temp_receipt.png"
+    with open(path, "wb") as f:
+        f.write(contents)
 
-if __name__ == "__main__":
-    main()
-    
+    # run OCR
+    itemDict = extract_items(path)
+    rawDate = date_purchased(path)
+    formattedDate = datetime.strptime(rawDate, "%d/%m/%y").date()
+    classifiedItems = classify_items(itemDict)
+
+    # insert into DB
+    connection = create_mysql_connection("localhost", "root", "Qweasdzxc$")
+    insertItems(connection, "FinanceTracker", classifiedItems, formattedDate)
+    connection.close()
+
+    return {"message": "Receipt uploaded and items added"}

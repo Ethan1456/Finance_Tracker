@@ -1,13 +1,18 @@
-function Sidebar(){
+// props to pass to Sidebar
+type SidebarProps = {
+    setCurrentPage: (page: string) => void;
+};
 
-    // write my html
+
+
+
+function Sidebar({ setCurrentPage }: SidebarProps){
     return(
-        <aside className="sidebar">
-            <ul>
-                <li>📊 Dashboard</li>
-                <li>📈 Analytics</li>
-            </ul>
-        </aside>
+         <div className="sidebar">
+            <button className= "sideButton" onClick={() => setCurrentPage("dashboard")}>Dashboard</button>
+            <button className= "sideButton" onClick={() => setCurrentPage("analytics")}>Analytics</button>
+            <button className= "sideButton" onClick={() => setCurrentPage("Help")}>Help</button>
+        </div>
     );
 }
 export default Sidebar;

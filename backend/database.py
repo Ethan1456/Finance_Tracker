@@ -2,7 +2,6 @@
 import mysql.connector
 from mysql.connector import Error
 
-
 def create_mysql_connection(host_name, user_name, user_password):
     """
     Creates and returns a MySQL connection.
@@ -55,9 +54,10 @@ def create_tables(connection, db_name):
             )
         """)
         print("Table 'items' created or already exists.")
-        cursor.close()
     except Error as e:
         print(f"Error: '{e}'")
+    finally:
+        cursor.close()
 
 def insertItems(connection, db_name, items, date_purchased):
     connection.database = db_name
