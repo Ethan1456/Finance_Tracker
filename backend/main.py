@@ -7,6 +7,7 @@ from database import insertItems, create_mysql_connection
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # MySQL connection info
 DB_HOST = "localhost"
@@ -23,6 +24,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+class PurchaseUpdate(BaseModel):
+    quantity: int
+    price: float
+    isEssential: bool
+    category: str
 
 
 # connecting to database
@@ -55,7 +62,6 @@ def get_purchases():
 
     return rows  # no mapping needed
 
-
 @app.post("/upload")
 async def upload_receipt(file: UploadFile = File(...)):
     contents = await file.read()
@@ -76,3 +82,34 @@ async def upload_receipt(file: UploadFile = File(...)):
     connection.close()
 
     return {"message": "Receipt uploaded and items added"}
+
+@app.put("/purchases/{purchase_id}")
+def update_purchase(purchase_id: int, purchase: PurchaseUpdate):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE purchases
+            SET quantity = %s, price = %s, isEssential = %s, category = %s
+            WHERE id = %s
+            """,
+            (
+                purchase.quantity,
+                purchase.price,
+                1 if purchase.isEssential else 0,  # store as 0/1
+                purchase.category,
+                purchase_id,
+            ),
+        )
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Purchase not found")
+
+        return {"message": "Purchase updated successfully"}
+
+    finally:
+        cursor.close()
+        conn.close()

@@ -52,6 +52,7 @@
 
 
 .dashboard {
+  overflow-x: auto;
   display: flex;
   flex-direction: column;
   flex: 2; 
@@ -97,6 +98,9 @@
 .userTable {
   color: black;
   width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  word-wrap: break-word;
   border-collapse: collapse;
 }
 
@@ -123,4 +127,12 @@
 
 .user-table th {
   background-color: #f4f4f4;
+}
+
+.tableInput {
+  width: 85px;       /* fixed width for inputs */
+  max-width: 100%;   /* don’t overflow cell */
+  padding: 4px 6px;  /* smaller padding */
+  font-size: 0.85rem; /* smaller font */
+  box-sizing: border-box; /* include padding in width */
 }

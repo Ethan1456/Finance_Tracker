@@ -29,15 +29,15 @@ def classify_items(itemDict):
                 # get first product name found from product json
                 product = data["products"][0]
                 # extract category from the product JSON format
-                category = product.get("categories_tags", [None])[0]
+                category = product.get("categories_tags", ["Other"])[0]
                 # if category exists, add to classified items
                 if category:
                     # formatting
                     category = category.replace("en:", "").replace("-", " ").title()
                     # just get first word of category
                     category = category.split()[0]
-
-
+                else:
+                    category = "Other"
                 # add to classified items
                 classifiedItems[name] = {
                     'quantity': details['quantity'],
