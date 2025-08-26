@@ -47,7 +47,6 @@ function UserTable({ tableData, setTableData }: UserTableProps) {
 
     return(
         <div>
-           // creating table structure
         <table className="user-table">
             <thead>
                 <tr>

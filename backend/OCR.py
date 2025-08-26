@@ -1,3 +1,5 @@
+from datetime import datetime
+from unicodedata import name
 from PIL import Image
 import pytesseract
 import re
@@ -5,6 +7,7 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 # converts image to text
 def date_purchased(path):
+    date_purchased = None
     img = Image.open(path)
     config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=config)
@@ -15,8 +18,18 @@ def date_purchased(path):
     # if date
     if date_match:
         date_purchased = date_match.group(0)
-    
-    print(f"Date Purchased: {date_purchased}")
+        try:
+            if len(date_purchased.split("/")[-1]) == 2:
+                # 2-digit year
+                date_purchased = datetime.strptime(date_purchased, "%d/%m/%y").date()
+            else:
+                # 4-digit year
+                date_purchased = datetime.strptime(date_purchased, "%d/%m/%Y").date()
+        except ValueError:
+            print(f"Warning: could not parse date '{date_purchased}', using None")
+            date_purchased = None
+
+    # print(f"Date Purchased: {date_purchased}")
     return date_purchased
 
 def extract_items(path):
@@ -24,10 +37,12 @@ def extract_items(path):
     img = Image.open(path)
     config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=config)
-
+    print("Full OCR Text:\n", text)
 
     # regex for extracting the actual text
-    items = re.finditer(r'(\d+)\s([A-Za-z\s]+?)\s(\d+\.\d{2})',text)
+    items = re.finditer(r'(\d+)\s+(.+?)\s+\$?(\d+\.\d{2})', text)
+
+
 
 
     # item dictionary
@@ -35,10 +50,14 @@ def extract_items(path):
 
     # loop through items and add to dictionary
     for item in items:
-        quantity = item.group(1)
+        quantity = int(item.group(1))
         name = item.group(2).strip()
-        price = item.group(3)
+        price = float(item.group(3))
+
+    
+
         itemDict[name] = {'quantity': quantity, 'price': price}
+
 
     # print items
     for name,details in itemDict.items():

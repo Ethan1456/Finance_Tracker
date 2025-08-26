@@ -1,4 +1,5 @@
 # mysql database
+from os import name
 import mysql.connector
 from mysql.connector import Error
 
@@ -63,10 +64,13 @@ def insertItems(connection, db_name, items, date_purchased):
     connection.database = db_name
     cursor = connection.cursor()
     try:
+        print("Items to insert:", items)
         for name, details in items.items():
             # skip the grand total item in dictionary
-            if name.strip().upper() in  ["GRAND TOTAL", "TOTAL"]:
+            skip_keywords = ["GRAND TOTAL", "TOTAL", "TAX"]
+            if any(name.strip().upper().startswith(k) for k in skip_keywords):
                 continue
+
             # execute query
             cursor.execute("""
                 INSERT INTO items (date_purchased, name, quantity, price, isEssential, category)
@@ -86,6 +90,8 @@ def insertItems(connection, db_name, items, date_purchased):
             ))
         connection.commit()
         print("Items inserted successfully.")
+
+
     except Error as e:
         print(f"Error: '{e}'")
     finally:

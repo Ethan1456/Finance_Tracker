@@ -76,18 +76,23 @@ async def upload_receipt(file: UploadFile = File(...)):
     with open(path, "wb") as f:
         f.write(contents)
 
+
     # run OCR
     itemDict = extract_items(path)
     rawDate = date_purchased(path)
-    formattedDate = datetime.strptime(rawDate, "%d/%m/%y").date()
+
+
+    print("item dict:", itemDict)
     classifiedItems = classify_items(itemDict)
 
     # insert into DB
-    connection = create_mysql_connection("localhost", "root", "Qweasdzxc$")
-    insertItems(connection, "FinanceTracker", classifiedItems, formattedDate)
+    connection = get_connection()
+    if connection is None:
+        raise Exception("DB connection failed")
+    insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
     connection.close()
 
-    return {"message": "Receipt uploaded and items added"}
+    return {"inserted_items": classifiedItems}
 
 @app.patch("/update-purchases")
 def update_purchases(purchases: List[PurchaseUpdate]):
