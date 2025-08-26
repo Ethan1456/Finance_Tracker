@@ -23,7 +23,8 @@ function App() {
         {/* set current page and render the appropriate component */}
         {/* passes as props */}
         <Sidebar setCurrentPage={setCurrentPage}
-        tableData={tableData} />
+        tableData={tableData} 
+        setTableData={setTableData} />
         <Dashboard currentPage={currentPage}
         tableData={tableData}
         setTableData={setTableData} />

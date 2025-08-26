@@ -63,6 +63,7 @@ def create_tables(connection, db_name):
 def insertItems(connection, db_name, items, date_purchased):
     connection.database = db_name
     cursor = connection.cursor()
+    inserted_items = {}
     try:
         print("Items to insert:", items)
         for name, details in items.items():
@@ -76,7 +77,7 @@ def insertItems(connection, db_name, items, date_purchased):
                 INSERT INTO items (date_purchased, name, quantity, price, isEssential, category)
                 VALUES (%s, %s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE
-                        quantity = VALUES(quantity),
+                        quantity = quantity + VALUES(quantity),
                         price = VALUES(price),
                         isEssential = VALUES(isEssential),
                         category = VALUES(category)
@@ -88,12 +89,14 @@ def insertItems(connection, db_name, items, date_purchased):
                 False,  # Assuming isEssential is False by default
                 details.get('category', None)  # Category can be None if not provided
             ))
+            inserted_items[name] = {
+                "quantity": details['quantity'],
+                "price": details['price'],
+                "category": details.get('category', None)
+            }
         connection.commit()
         print("Items inserted successfully.")
-
-
-    except Error as e:
-        print(f"Error: '{e}'")
+        return inserted_items
     finally:
         cursor.close()
 

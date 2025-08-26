@@ -89,10 +89,10 @@ async def upload_receipt(file: UploadFile = File(...)):
     connection = get_connection()
     if connection is None:
         raise Exception("DB connection failed")
-    insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
+    inserted_items = insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
     connection.close()
 
-    return {"inserted_items": classifiedItems}
+    return {"message": "Receipt uploaded and items added", "inserted_items": inserted_items}
 
 @app.patch("/update-purchases")
 def update_purchases(purchases: List[PurchaseUpdate]):

@@ -4,12 +4,13 @@ import { useRef } from "react";
 type SidebarProps = {
     setCurrentPage: (page: string) => void;
     tableData: TableRow[];
+    setTableData: React.Dispatch<React.SetStateAction<TableRow[]>>;
 };
 
 
 
 
-function Sidebar({ setCurrentPage,tableData }: SidebarProps){
+function Sidebar({ setCurrentPage,tableData,setTableData }: SidebarProps){
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleSaveAll = async () => {
@@ -43,7 +44,39 @@ function Sidebar({ setCurrentPage,tableData }: SidebarProps){
             });
 
             if (response.ok) {
-                alert("Receipt inserted successfully!");
+                // convert from JSON into array of rows for react
+                const data = await response.json();
+                const insertedItems: TableRow[] = Object.entries(data.inserted_items).map(
+                ([name, details]) => {
+                    const d = details as { quantity: number; price: number; category?: string };
+                    return {
+                    name,
+                    quantity: d.quantity,
+                    price: d.price,
+                    category: d.category || "",
+                    isEssential: false,
+                    } as TableRow;
+                }
+                );
+
+                // Update the table data state
+                setTableData(prev => {
+                const newData = [...prev];
+                insertedItems.forEach(item => {
+                    const existingIndex = newData.findIndex(row => row.name === item.name);
+                    if (existingIndex > -1) {
+                    // if item already exists, update it
+                    newData[existingIndex].quantity += item.quantity;
+                    newData[existingIndex].price = item.price; 
+                    } else {
+                    // if it’s new, add it
+                    newData.push(item);
+                    }
+                });
+                return newData;
+                });
+
+            alert("Receipt inserted and items added!");
             } else {
                 alert("Failed to insert receipt.");
                 console.error("Error response:", await response.text());
