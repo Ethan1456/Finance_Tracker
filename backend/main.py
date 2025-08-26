@@ -8,6 +8,18 @@ from datetime import datetime
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
+
+# Pydantic model for a single purchase update
+class PurchaseUpdate(BaseModel):
+    id: int
+    quantity: int
+    price: float
+    isEssential: bool
+    category: str
+
+
+
 
 # MySQL connection info
 DB_HOST = "localhost"
@@ -24,12 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class PurchaseUpdate(BaseModel):
-    quantity: int
-    price: float
-    isEssential: bool
-    category: str
 
 
 # connecting to database
@@ -83,33 +89,30 @@ async def upload_receipt(file: UploadFile = File(...)):
 
     return {"message": "Receipt uploaded and items added"}
 
-@app.put("/purchases/{purchase_id}")
-def update_purchase(purchase_id: int, purchase: PurchaseUpdate):
+@app.patch("/update-purchases")
+def update_purchases(purchases: List[PurchaseUpdate]):
     conn = get_connection()
+    if conn is None:
+        raise HTTPException(status_code=500, detail="DB connection failed")
     cursor = conn.cursor()
-
     try:
-        cursor.execute(
-            """
-            UPDATE purchases
-            SET quantity = %s, price = %s, isEssential = %s, category = %s
-            WHERE id = %s
-            """,
-            (
-                purchase.quantity,
-                purchase.price,
-                1 if purchase.isEssential else 0,  # store as 0/1
-                purchase.category,
-                purchase_id,
-            ),
-        )
+        for purchase in purchases:
+            cursor.execute(
+                f"""
+                UPDATE {TABLE_NAME}
+                SET quantity=%s, price=%s, isEssential=%s, category=%s
+                WHERE id=%s
+                """,
+                (
+                    purchase.quantity,
+                    purchase.price,
+                    1 if purchase.isEssential else 0,
+                    purchase.category,
+                    purchase.id,
+                ),
+            )
         conn.commit()
-
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Purchase not found")
-
-        return {"message": "Purchase updated successfully"}
-
+        return {"message": f"{len(purchases)} purchases updated successfully"}
     finally:
         cursor.close()
         conn.close()

@@ -10,44 +10,37 @@ type TableRow = {
   isEssential: boolean;
   category: string;
 };
+// props
+type UserTableProps = {
+  tableData: TableRow[];
+  setTableData: React.Dispatch<React.SetStateAction<TableRow[]>>;
+};
 
 
-function UserTable(){
-    // state
-    const [data, setData] = useState<TableRow[]>([]);
 
-    // fetch data from API
+function UserTable({ tableData, setTableData }: UserTableProps) {
+
+
+    // fetch data from API, updating parent state - make sure latest data given
     useEffect(() => {
         fetch("http://127.0.0.1:8000/purchases")
             .then((res) => res.json())
             .then((data) =>
-            setData(data.map((row: any) => ({ ...row, isEssential: !!row.isEssential })))
+            setTableData(data.map((row: any) => ({ ...row, isEssential: !!row.isEssential })))
             )
             .catch((err) => console.error("Error fetching purchases:", err));
-    }, []);
+        }, [setTableData]);
 
-    // edit data in the table
+
+    // edit data in the table the central state
     const handleChange = (id: number, field: keyof TableRow, value: any) => {
-        const updated = data.map((row) =>
-            row.id === id ? { ...row, [field]: value } : row
+        setTableData((prev) =>
+            prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
         );
-        setData(updated);
-     };
-
-    // save changes to backend
-    // Save all changes
-    const saveAllChanges = async () => {
-        try {
-        await fetch("http://127.0.0.1:8000/update-purchases", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        alert("All changes saved!");
-        } catch (err) {
-        console.error("Error saving changes:", err);
-        }
     };
+
+
+  
 
 
 
@@ -68,7 +61,7 @@ function UserTable(){
             </thead>
             <tbody>
                 {/* mapping the data to table rows */}
-                {data.map((item) => (
+                {tableData.map((item) => (
                 <tr key={item.id}>
                     {/* date stays read-only */}
                     <td>{item.date_purchased}</td>
