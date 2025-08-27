@@ -72,26 +72,33 @@ def get_purchases():
     return rows  # no mapping needed
 
 @app.post("/upload")
-async def upload_receipt(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+async def upload_receipt(file: UploadFile = File(...)):
+    # Read and save the file temporarily
     contents = await file.read()
-    # save file temporarily
-    path = f"temp_receipt.png"
+    path = "temp_receipt.png"
     with open(path, "wb") as f:
         f.write(contents)
 
-# Run background task for DB insert
+    # Extract items from the receipt
     itemDict = extract_items(path)
     rawDate = date_purchased(path)
     classifiedItems = classify_items(itemDict)
-    
-    print(itemDict,rawDate,classifiedItems)
-    print("finished")
 
+    print(f"Raw extracted items: {itemDict}")
+    print(f"Raw date purchased: {rawDate}")
+    print(f"Classified items: {classifiedItems}")
+
+    # Insert items into the database
     connection = get_connection()
     insertedItems = insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
     connection.close()
 
-    return {"message": "Receipt received. Processing in background.", "inserted_items": insertedItems}
+    # Return inserted items and the purchase date
+    return {
+        "message": "Receipt uploaded and items added successfully.",
+        "inserted_items": insertedItems,
+        "date": rawDate
+    }
 
 @app.patch("/update-purchases")
 def update_purchases(purchases: List[PurchaseUpdate]):

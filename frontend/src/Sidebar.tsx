@@ -49,13 +49,14 @@ function Sidebar({ setCurrentPage,tableData,setTableData }: SidebarProps){
                 // convert each table row into a key value pair map tyrns each pair into tableRow frontend expects
                 const insertedItems: TableRow[] = Object.entries(data.inserted_items).map(
                 ([name, details]) => {
-                    const d = details as { quantity: number; price: number; category?: string };
+                    const d = details as { quantity: number; price: number; category?: string; date_purchased: string };
                     return {
                     name,
                     quantity: d.quantity,
                     price: d.price,
                     category: d.category || "",
                     isEssential: false,
+                    date_purchased: d.date_purchased,
                     } as TableRow;
                 }
                 );

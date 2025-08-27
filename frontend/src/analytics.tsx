@@ -19,8 +19,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 function categoryChart(tableData: TableRow[]){
     // get category data from tableData
     const categoryData = tableData.reduce((acc, row) => {
-        const { category, quantity } = row;
-        acc[category] = (acc[category] || 0) + quantity;
+        const { category, price } = row;
+        acc[category] = (acc[category] || 0) + price;
         return acc;
     }, {} as Record<string, number>);
 
@@ -67,8 +67,8 @@ function essentialsChart(tableData: TableRow[]){
     // get essentials vs non-essentials data from tableData
     // .reduce iterate over array and callback on each element and accumulate a single value
     const essentialsData = tableData.reduce((acc, row) => {
-        const { isEssential, quantity } = row;
-        acc[isEssential ? "essentials" : "nonEssentials"] = (acc[isEssential ? "essentials" : "nonEssentials"] || 0) + quantity;
+        const { isEssential, price } = row;
+        acc[isEssential ? "essentials" : "nonEssentials"] = (acc[isEssential ? "essentials" : "nonEssentials"] || 0) + price;
         return acc;
     }, {} as Record<string, number>);
 
@@ -109,12 +109,12 @@ function essentialsChart(tableData: TableRow[]){
 function yearlyTrendsChart(tableData: TableRow[]){
     // get the yearly data
     const yearlyData = tableData.reduce((acc, row) => {
-        const { date_purchased, quantity } = row;
+        const { date_purchased, price } = row;
         if (!date_purchased){
             return acc;
         }
         const year = new Date(date_purchased).getFullYear();
-        acc[year] = (acc[year] || 0) + quantity;
+        acc[year] = (acc[year] || 0) + price;
         return acc;
     }, {} as Record<number, number>);
 
