@@ -74,7 +74,7 @@ function UserTable({ tableData, setTableData }: UserTableProps) {
                 {tableData.map((item) => (
                 <tr key={item.id}>
                     {/* date stays read-only */}
-                    <td>{item.date_purchased}</td>
+                    <td>{item.date_purchased ? item.date_purchased : "N/A"}</td>
 
                     {/* name stays read-only (unless you also want to edit it) */}
                     <td>{item.name}</td>
