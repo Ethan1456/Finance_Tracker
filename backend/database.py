@@ -65,7 +65,6 @@ def insertItems(connection, db_name, items, date_purchased):
     cursor = connection.cursor()
     inserted_items = {}
     try:
-        print("Items to insert:", items)
         for name, details in items.items():
             # skip the grand total item in dictionary
             skip_keywords = ["GRAND TOTAL", "TOTAL", "TAX"]

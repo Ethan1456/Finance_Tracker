@@ -39,10 +39,21 @@ function UserTable({ tableData, setTableData }: UserTableProps) {
         );
     };
 
-
-  
-
-
+    const handleDelete = (id: number) => {
+        fetch(`http://127.0.0.1:8000/delete-purchase/${id}`, {
+            method: "DELETE",
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to delete purchase");
+                }
+                return res.json();
+            })
+            .then(() => {
+                setTableData((prev) => prev.filter((row) => row.id !== id));
+            })
+            .catch((err) => console.error("Error deleting purchase:", err));
+    };
 
 
     return(
@@ -115,6 +126,9 @@ function UserTable({ tableData, setTableData }: UserTableProps) {
                         handleChange(item.id, "category", e.target.value)
                         }
                     />
+                    </td>
+                    <td>
+                        <button onClick={() => handleDelete(item.id)}>Delete</button>
                     </td>
                 </tr>
                 ))}

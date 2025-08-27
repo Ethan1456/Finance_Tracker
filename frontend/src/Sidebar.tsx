@@ -44,8 +44,9 @@ function Sidebar({ setCurrentPage,tableData,setTableData }: SidebarProps){
             });
 
             if (response.ok) {
-                // convert from JSON into array of rows for react
+                // convert from JSON into array of rows for frontend display
                 const data = await response.json();
+                // convert each table row into a key value pair map tyrns each pair into tableRow frontend expects
                 const insertedItems: TableRow[] = Object.entries(data.inserted_items).map(
                 ([name, details]) => {
                     const d = details as { quantity: number; price: number; category?: string };
@@ -60,8 +61,11 @@ function Sidebar({ setCurrentPage,tableData,setTableData }: SidebarProps){
                 );
 
                 // Update the table data state
+                // callback and copy it
                 setTableData(prev => {
                 const newData = [...prev];
+                // loops through each new inserted items, if exist update quantity and price
+                // if non exist - add new row and return updated array to react and frontend
                 insertedItems.forEach(item => {
                     const existingIndex = newData.findIndex(row => row.name === item.name);
                     if (existingIndex > -1) {
@@ -85,9 +89,6 @@ function Sidebar({ setCurrentPage,tableData,setTableData }: SidebarProps){
             console.error("Error inserting receipt:", err);
         }
     };
-
-
-
 
     return(
          <div className="sidebar">

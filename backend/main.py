@@ -82,7 +82,6 @@ async def upload_receipt(file: UploadFile = File(...)):
     rawDate = date_purchased(path)
 
 
-    print("item dict:", itemDict)
     classifiedItems = classify_items(itemDict)
 
     # insert into DB
@@ -96,6 +95,7 @@ async def upload_receipt(file: UploadFile = File(...)):
 
 @app.patch("/update-purchases")
 def update_purchases(purchases: List[PurchaseUpdate]):
+    
     conn = get_connection()
     if conn is None:
         raise HTTPException(status_code=500, detail="DB connection failed")
@@ -118,6 +118,24 @@ def update_purchases(purchases: List[PurchaseUpdate]):
             )
         conn.commit()
         return {"message": f"{len(purchases)} purchases updated successfully"}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+@app.delete("/delete-purchase/{purchase_id}")
+def delete_purchase(purchase_id: int):
+    conn = get_connection()
+    if conn is None:
+        raise HTTPException(status_code=500, detail="DB connection failed")
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE id=%s", (purchase_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Purchase not found")
+        return {"message": "Purchase deleted successfully"}
     finally:
         cursor.close()
         conn.close()

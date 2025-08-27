@@ -37,7 +37,6 @@ def extract_items(path):
     img = Image.open(path)
     config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=config)
-    print("Full OCR Text:\n", text)
 
     # regex for extracting the actual text
     items = re.finditer(r'(\d+)\s+(.+?)\s+\$?(\d+\.\d{2})', text)
