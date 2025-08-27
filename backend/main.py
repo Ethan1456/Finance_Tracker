@@ -9,6 +9,8 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+from fastapi import BackgroundTasks
+
 
 # Pydantic model for a single purchase update
 class PurchaseUpdate(BaseModel):
@@ -19,6 +21,7 @@ class PurchaseUpdate(BaseModel):
     category: str
 
 
+    
 
 
 # MySQL connection info
@@ -69,29 +72,26 @@ def get_purchases():
     return rows  # no mapping needed
 
 @app.post("/upload")
-async def upload_receipt(file: UploadFile = File(...)):
+async def upload_receipt(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     contents = await file.read()
     # save file temporarily
     path = f"temp_receipt.png"
     with open(path, "wb") as f:
         f.write(contents)
 
-
-    # run OCR
+# Run background task for DB insert
     itemDict = extract_items(path)
     rawDate = date_purchased(path)
-
-
     classifiedItems = classify_items(itemDict)
+    
+    print(itemDict,rawDate,classifiedItems)
+    print("finished")
 
-    # insert into DB
     connection = get_connection()
-    if connection is None:
-        raise Exception("DB connection failed")
-    inserted_items = insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
+    insertedItems = insertItems(connection, "FinanceTracker", classifiedItems, rawDate)
     connection.close()
 
-    return {"message": "Receipt uploaded and items added", "inserted_items": inserted_items}
+    return {"message": "Receipt received. Processing in background.", "inserted_items": insertedItems}
 
 @app.patch("/update-purchases")
 def update_purchases(purchases: List[PurchaseUpdate]):
@@ -131,10 +131,11 @@ def delete_purchase(purchase_id: int):
         raise HTTPException(status_code=500, detail="DB connection failed")
     cursor = conn.cursor()
     try:
-        cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE id=%s", (purchase_id,))
+        cursor.execute(
+            f"DELETE FROM {TABLE_NAME} WHERE id=%s",
+            (purchase_id,),
+        )
         conn.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Purchase not found")
         return {"message": "Purchase deleted successfully"}
     finally:
         cursor.close()

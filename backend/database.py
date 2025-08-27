@@ -66,12 +66,6 @@ def insertItems(connection, db_name, items, date_purchased):
     inserted_items = {}
     try:
         for name, details in items.items():
-            # skip the grand total item in dictionary
-            skip_keywords = ["GRAND TOTAL", "TOTAL", "TAX"]
-            if any(name.strip().upper().startswith(k) for k in skip_keywords):
-                continue
-
-            # execute query
             cursor.execute("""
                 INSERT INTO items (date_purchased, name, quantity, price, isEssential, category)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -85,14 +79,16 @@ def insertItems(connection, db_name, items, date_purchased):
                 name,
                 details['quantity'],
                 details['price'],
-                False,  # Assuming isEssential is False by default
-                details.get('category', None)  # Category can be None if not provided
+                False,
+                details.get('category', None)
             ))
             inserted_items[name] = {
                 "quantity": details['quantity'],
                 "price": details['price'],
-                "category": details.get('category', None)
+                "category": details.get('category', None),
+                "date_purchased": date_purchased.strftime("%Y-%m-%d") if date_purchased else None
             }
+
         connection.commit()
         print("Items inserted successfully.")
         return inserted_items

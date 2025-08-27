@@ -38,25 +38,20 @@ def extract_items(path):
     config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=config)
 
-    # regex for extracting the actual text
-    items = re.finditer(r'(\d+)\s+(.+?)\s+\$?(\d+\.\d{2})', text)
-
-
-
-
     # item dictionary
     itemDict = {}
-
-    # loop through items and add to dictionary
-    for item in items:
-        quantity = int(item.group(1))
-        name = item.group(2).strip()
-        price = float(item.group(3))
-
-    
-
-        itemDict[name] = {'quantity': quantity, 'price': price}
-
+    skip_keywords = ["GRAND TOTAL", "TOTAL", "TAX", "SUBTOTAL"]
+    for line in text.splitlines():
+        if any(k in line.upper() for k in skip_keywords):
+            continue
+        
+        match = re.match(r'^\s*(\d+)\s+([A-Za-z\s]+?)\s+\$?(\d+\.\d{2})\s*$', line)
+        
+        if match:
+            quantity = int(match.group(1))
+            name = match.group(2).strip()
+            price = float(match.group(3))
+            itemDict[name] = {"quantity": quantity, "price": price}
 
     # print items
     for name,details in itemDict.items():
