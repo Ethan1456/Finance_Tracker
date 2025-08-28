@@ -10,7 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from fastapi import BackgroundTasks
-
+from dotenv import load_dotenv
+import os
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 # Pydantic model for a single purchase update
 class PurchaseUpdate(BaseModel):
@@ -21,14 +24,16 @@ class PurchaseUpdate(BaseModel):
     category: str
 
 
-    
+load_dotenv()
 
 
 # MySQL connection info
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "Qweasdzxc$"
-DB_NAME = "FinanceTracker"
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = int(os.getenv("DB_PORT", 3306))  # default to 3306 if not set
+
 TABLE_NAME = "items"
 
 # add this to show up in table as stops browser blocking
@@ -129,7 +134,49 @@ def update_purchases(purchases: List[PurchaseUpdate]):
         cursor.close()
         conn.close()
 
+@app.get("/predicted-spending")
+def get_predicted():
+    conn = get_connection()
+    if conn is None:
+        raise HTTPException(status_code=500, detail="DB connection failed")
+    cursor = conn.cursor()
+    try:
+        # Fetch total spending per month
+        cursor.execute(
+            f"""
+            SELECT 
+                YEAR(date_purchased) AS year, 
+                MONTH(date_purchased) AS month, 
+                SUM(price * quantity) AS total_spent
+            FROM {TABLE_NAME}
+            GROUP BY year, month
+            ORDER BY year, month
+            """
+        )
+        rows = cursor.fetchall()
 
+        if len(rows) < 2:
+            return {"error": "Not enough data to make predictions."}
+
+        # Prepare data for linear regression
+        X = np.array([[i] for i in range(len(rows))])  # Months as integers
+        y = np.array([row['total_spent'] for row in rows])
+
+        # Train linear regression model
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # Predict next month's spending
+        next_month_index = np.array([[len(rows)]])
+        predicted_spending = model.predict(next_month_index)[0]
+
+        return {
+            "historical_data": rows,
+            "predicted_next_month_spending": predicted_spending
+        }
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.delete("/delete-purchase/{purchase_id}")
 def delete_purchase(purchase_id: int):

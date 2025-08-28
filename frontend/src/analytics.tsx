@@ -1,17 +1,19 @@
 import type { TableRow } from "./types";
-import { Pie } from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend
 } from "chart.js";
-
+import { use } from "react";
+import { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
 // props
 type AnalyticsProps = {
   tableData: TableRow[];
 };
-
+import PredictedSpending from "./predictedSpending";
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -155,8 +157,6 @@ function yearlyTrendsChart(tableData: TableRow[]){
 
 
 
-
-
 function Analytics({ tableData }: AnalyticsProps) {
   return (
     <div style={{display:"flex", flexWrap:"wrap", gap:"2rem"}}>
@@ -180,6 +180,7 @@ function Analytics({ tableData }: AnalyticsProps) {
       {/* Chart 4 */}
       <div style={{ flex: "1 1 45%", minWidth: "300px" }}>
         <h3>💰 Predicted vs Actual Spending</h3>
+        <div id="predicted-actual-chart"><PredictedSpending /></div>
       </div>
     </div>
   );
