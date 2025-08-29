@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pymysql
+python-dotenv
+pydantic
+requests
+Pillow
+pytesseract
+scikit-learn
+numpy
+python-multipart
+cryptography
