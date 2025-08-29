@@ -12,12 +12,8 @@ services:
 
   backend:
     build: ./backend
-    environment:
-      - DB_USER=root
-      - DB_PASSWORD=Qweasdzxc$
-      - DB_NAME=FinanceTracker
-      - DB_HOST=db
-      - DB_PORT=3306
+    env_file:
+    - ./backend/.env
     ports:
       - "8000:8000"
     depends_on:
@@ -27,8 +23,10 @@ services:
 
   db:
     image: mysql:8.0
+    env_file:
+    - ./backend/.env
     environment:
-      MYSQL_ROOT_PASSWORD: Qweasdzxc$
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: FinanceTracker
     ports:
       - "3307:3306"

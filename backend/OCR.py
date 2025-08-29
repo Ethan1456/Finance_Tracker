@@ -3,7 +3,7 @@ from unicodedata import name
 from PIL import Image
 import pytesseract
 import re
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 # converts image to text
 def date_purchased(path):

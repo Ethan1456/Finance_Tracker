@@ -3,7 +3,7 @@ import Sidebar from "./Sidebar"
 import Dashboard from "./Dashboard"
 import "./App.css"
 import Overview from "./Overview"
-import Footer from "./footer"
+import Footer from "./Footer"
 import {useState} from "react";
 import type { TableRow } from "./types";
 
