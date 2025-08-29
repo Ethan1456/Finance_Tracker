@@ -1,14 +1,12 @@
 import type { TableRow } from "./types";
-import { Bar, Pie } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend
 } from "chart.js";
-import { use } from "react";
-import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+
 // props
 type AnalyticsProps = {
   tableData: TableRow[];

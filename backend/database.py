@@ -1,24 +1,6 @@
 # mysql database
 from os import name
-import mysql.connector
-from mysql.connector import Error
 
-def create_mysql_connection(host_name, user_name, user_password):
-    """
-    Creates and returns a MySQL connection.
-    """
-    try:
-        connection = mysql.connector.connect(
-            host=host_name,
-            user=user_name,
-            password=user_password
-        )
-        if connection.is_connected():
-            print("Connected to MySQL")
-            return connection
-    except Error as e:
-        print(f"Error: '{e}'")
-        return None
 
 def create_database(connection, db_name):
     """

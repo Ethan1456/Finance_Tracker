@@ -3,7 +3,7 @@ import pymysql
 app = FastAPI()
 from OCR import extract_items, date_purchased
 from classification import classify_items
-from database import insertItems, create_mysql_connection
+from database import insertItems
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware

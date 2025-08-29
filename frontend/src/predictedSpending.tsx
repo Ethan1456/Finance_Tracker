@@ -51,10 +51,10 @@ function PredictedSpending() {
       {
         label: "Spending (£)",
         data: values,
-        backgroundColor: labels.map((label, idx) =>
+        backgroundColor: labels.map((label) =>
           label === "Next Month" ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)"
         ), // highlight predicted differently
-        borderColor: labels.map((label, idx) =>
+        borderColor: labels.map((label) =>
           label === "Next Month" ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)"
         ),
         borderWidth: 1,
